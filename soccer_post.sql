@@ -29,7 +29,7 @@ SELECT * FROM italy;
 Find all the games in England between seasons 1920 and 1999 such that the total goals are at least 13.
 Order by total goals descending.*/
 
-/*SELECT * FROM england WHERE season >= 1920 AND season <= 1999 AND totgoal >= 13 ORDER BY totgoal DESC;*/
+SELECT * FROM england WHERE season >= 1920 AND season <= 1999 AND totgoal >= 13 ORDER BY totgoal DESC;
 
 /*Sample result
 1935-12-26,1935,Tranmere Rovers,Oldham Athletic,13,4,3,17,9,H
@@ -42,7 +42,7 @@ For each total goal result, find how many games had that result.
 Use the england table and consider only the seasons since 1980.
 Order by total goal.*/
 
-/*SELECT totgoal, count(totgoal) AS countgoal FROM england WHERE season >= 1980 GROUP BY totgoal ORDER BY totgoal;*/
+SELECT totgoal, count(totgoal) AS countgoal FROM england WHERE season >= 1980 GROUP BY totgoal ORDER BY totgoal;
 
 /*Sample result
 0,6085
@@ -61,7 +61,7 @@ Find the number of games each team has played as "visitor".
 Then union the two and take the sum of the number of games.
 */
 
-/*WITH A AS (
+WITH A AS (
 	SELECT home, count(home) AS counthome 
 	FROM england 
 	WHERE tier = 1 AND season >= 1980 
@@ -75,7 +75,7 @@ Then union the two and take the sum of the number of games.
 	) 
 SELECT home AS team, sum(counthome) AS sumgames 
 FROM A 
-GROUP BY home;*/
+GROUP BY home;
 
 /*Sample result
 Everton,1451
@@ -91,11 +91,11 @@ Order the results by the number of home-wins in descending order.
 Hint. After selecting the tuples needed (... WHERE tier=1 AND ...) do a GROUP BY home, visitor.
 */
 
-/*SELECT home AS team1, visitor AS team2, count(result) AS homewins 
+SELECT home AS team1, visitor AS team2, count(result) AS homewins 
 FROM england 
 WHERE tier=1 AND season >= 1980 AND result='H' 
 GROUP BY home, visitor 
-ORDER BY homewins DESC;*/
+ORDER BY homewins DESC;
 
 /*Sample result
 Manchester United,Tottenham Hotspur,27
@@ -108,8 +108,8 @@ For each pair team1, team2 in England in tier 1
 find the number of away-wins since 1980 of team1 versus team2.
 Order the results by the number of away-wins in descending order.*/
 
-/*select visitor as team1, home as team2, count(result) from england where result = 'A' and tier = 1
-and season >= 1980 group by team1, team2 order by count desc;*/
+select visitor as team1, home as team2, count(result) from england where result = 'A' and tier = 1
+and season >= 1980 group by team1, team2 order by count desc;
 
 /*Sample result
 Manchester United,Aston Villa,18
@@ -127,7 +127,7 @@ queries as subqueries. Remove their ORDER BY clause when making them subqueries.
 Be careful on the join conditions.
 */
 
-/*with X as (
+with X as (
 	select home as team1, visitor as team2, count(result) as homewins 
 	from england 
 	where result = 'H' and tier = 1 and season >= 1980 
@@ -142,7 +142,7 @@ Y as (
 select team1, team2, homewins, awaywins 
 from X join Y 
 using (team1, team2) 
-order by awaywins desc;*/
+order by awaywins desc;
 
 /*Sample result
 Manchester United,Aston Villa,26,18
@@ -159,7 +159,7 @@ of Arsenal versus team2 and the number of home-wins and away-wins of team2 versu
 Order the results by the second number of away-wins in descending order.
 Use view W1.*/
 
-/*CREATE VIEW Wins AS with X as (
+CREATE VIEW Wins AS with X as (
 	select home as team1, visitor as team2, count(result) as homewins 
 	from england 
 	where result = 'H' and tier = 1 and season >= 1980 
@@ -190,7 +190,7 @@ B AS (
 	)
 SELECT B.team2, B.team1, homeAwins, awayAwins, homeBwins, awayBwins
 FROM A, B where A.team2 = B.team1
-ORDER BY awayBwins DESC;*/
+ORDER BY awayBwins DESC;
 
 /*Sample result
 Arsenal,Liverpool,14,8,20,11
@@ -209,7 +209,7 @@ Nevertheless, some teams have won more games as a visitor than when at home.
 Find the team in Germany that has more away-wins than home-wins in total.
 Print the team name, number of home-wins, and number of away-wins.*/
 
-/*WITH A AS (
+WITH A AS (
 	SELECT home, count(*) AS homewins 
 	FROM germany 
 	WHERE hgoal>vgoal 
@@ -223,7 +223,7 @@ B AS (
 	) 
 SELECT A.home AS team, homewins, awaywins 
 FROM A JOIN B ON A.home=B.visitor 
-WHERE A.homewins<B.awaywins;*/
+WHERE A.homewins<B.awaywins;
 
 /*Sample result
 Wacker Burghausen	...	...*/
@@ -246,9 +246,9 @@ Subquery 2: Find the average total goals per season in Italy
 Join the two subqueries on season.
 */
 
-/*with X as (select season, avg(totgoal) as england_avg from england where season >= 1970
+with X as (select season, avg(totgoal) as england_avg from england where season >= 1970
 group by season), Y as (select season, avg(hgoal+vgoal) as italy_avg from italy where
-season >= 1970 group by season) select season, england_avg, italy_avg from X join Y using (season);*/
+season >= 1970 group by season) select season, england_avg, italy_avg from X join Y using (season);
 
 --Build a line chart visualizing the results. What do you observe?
 
@@ -264,10 +264,10 @@ Return (goaldif, france_games, eng_games) triples, ordered by the goal differenc
 Normalize the number of games returned dividing by the total number of games for the country in tier 1,
 e.g. 1.0*COUNT(*)/(select count(*) from france where tier=1)  */
 
-/*with X as (select goaldif, 1.0*count(goaldif)/(select count(*) from france where tier=1)  as france_games
+with X as (select goaldif, 1.0*count(goaldif)/(select count(*) from france where tier=1)  as france_games
 from france where tier = 1 group by goaldif), Y as (select goaldif, 1.0*count(goaldif)/(select count(*)
 from england where tier=1) as england_games from england where tier = 1 group by goaldif) select goaldif,
-france_games, england_games from X join Y using (goaldif) order by goaldif;*/
+france_games, england_games from X join Y using (goaldif) order by goaldif;
 
 /*Sample result
 -8,0.00011369234850494562,0.000062637018477920450987
@@ -283,9 +283,9 @@ Consider only tier 1 for both countries.
 Return (season,england_avg,france_avg) triples.
 Order by season.*/
 
-/*with X as (select season, avg(totgoal) as england_avg from england where tier = 1 group by season), Y as (
+with X as (select season, avg(totgoal) as england_avg from england where tier = 1 group by season), Y as (
 select season, avg(totgoal) as france_avg from france where tier = 1 group by season) select season,
-england_avg, france_avg from X join Y using (season) where england_avg>france_avg order by season;*/
+england_avg, france_avg from X join Y using (season) where england_avg>france_avg order by season;
 
 /*Sample result
 1936,3.3658008658008658,3.3041666666666667
